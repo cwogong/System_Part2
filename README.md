@@ -26,17 +26,31 @@ Rust의 비동기 I/O 런타임(`tokio`)을 활용하여 동시성 문제를 안
 
 <br>
 
+## 📂 프로젝트 구조 (Directory Structure)
+
+```text
+📦 System_Part2 (Project Root)
+├── 📜 README.md           # 프로젝트 설명 및 결과 보고서 (현재 파일)
+└── 📁 src/
+    ├── 📁 bin/            # 독립적으로 실행 가능한 다중 바이너리(타겟) 폴더
+    │   ├── 📄 client.rs   # 사용자용 채팅 클라이언트 로직 (CLI/Web)
+    │   ├── 📄 server.rs   # 메인 멀티채팅 서버 로직 (Broadcasting, 동시성 제어)
+    │   └── 📄 tester.rs   # 500명 동시 접속 및 메시지 유실 검증용 부하 테스트 봇
+```
+
+<br>
+
 ## 📦 설치 및 실행 방법 (Getting Started)
 
 ### 1. 저장소 클론
 ```bash
-git clone [https://github.com/your-username/rust-multi-chat.git](https://github.com/your-username/rust-multi-chat.git)
+git clone [https://github.com/cwogong/System_Part2](https://github.com/cwogong/System_Part2)
 cd rust-multi-chat
 ```
 
 <br>
 
-## 🔒 동시성 제어 및 Race Condition 해결 (Concurrency & Safety)
+## 🔒 동시성 제어 및 Race Condition 해결계획 (Concurrency & Safety)
 
 본 프로젝트는 수백 명의 클라이언트가 동시에 접속하여 메시지를 주고받는 환경이므로, **동일한 자원(클라이언트 목록, 메시지 큐 등)에 대한 동시 접근(Concurrency)**이 필연적으로 발생합니다. 이 과정에서 발생할 수 있는 Race Condition을 식별하고 안전하게 해결했습니다.
 
