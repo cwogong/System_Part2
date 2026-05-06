@@ -8,7 +8,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let listener = TcpListener::bind("127.0.0.1:8080").await?;
     println!("🚀 비동기 채팅 서버가 127.0.0.1:8080에서 실행 중입니다.");
 
-    // 2. 단 하나의 방송국(Channel) 개설! (최대 1024개 메시지 버퍼링)
+    // 2. 채널 개설
     // tx: 송신기(전파탑), _rx: 수신기 (여기선 안 쓰고 클라이언트 접속 시 복사해 줌)
     let (tx, _rx) = broadcast::channel::<String>(1024);
 
@@ -21,18 +21,18 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         let tx = tx.clone();
         let mut rx = tx.subscribe();
 
-        // 5. 각 유저를 독립된 비동기 태스크(Task)로 분리 (OS 스레드가 아님!)
+        // 5. 각 유저를 독립된 비동기 태스크로 분리
         tokio::spawn(async move {
-            // 소켓을 읽기(reader)와 쓰기(writer)로 반갈죽(?) 합니다.
+            // 소켓을 읽기(reader)와 쓰기(writer)로 나눔
             let (reader, mut writer) = socket.split();
             let mut reader = BufReader::new(reader);
             let mut line = String::new();
 
             loop {
                 // 💡 핵심: tokio::select! 
-                // 유저가 채팅을 치는 것(수신)과, 남의 채팅을 전달받는 것(송신)을 동시에 기다립니다!
+                // 수신과 송신 기다림
                 tokio::select! {
-                    // [이벤트 A] 현재 유저가 서버로 메시지를 보냈을 때
+                    // 현재 유저가 서버로 메시지를 보냈을 때
                     result = reader.read_line(&mut line) => {
                         if result.unwrap() == 0 {
                             println!("❌ 유저 퇴장: {}", addr);
@@ -42,7 +42,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                         // 받은 메시지 앞에 유저의 주소를 예쁘게 붙입니다.
                         let msg = format!("{}: {}", addr, line);
 
-                        // ⭐ 이 코드를 추가하세요!
                         print!("📩 [LOG] {}", msg); // 서버 터미널에 메시지 출력 (line에 \n이 포함되어 있어 print 사용)
                         
                         // 🌟 방송국 전파탑(tx)에 메시지를 쏩니다! (그러면 모든 rx에게 뿌려짐)

@@ -5,7 +5,7 @@ use std::collections::HashSet;
 use std::time::Instant;
 
 // 💡 목표 인원인 500명으로 설정합니다. (OS 환경에 따라 접속이 튕기면 100~200으로 낮춰서 먼저 테스트하세요)
-const CLIENT_COUNT: usize = 500;
+const CLIENT_COUNT: usize = 100;
 
 #[tokio::main]
 async fn main() {
