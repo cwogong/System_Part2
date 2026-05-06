@@ -6,9 +6,7 @@ slint::slint! {
         width: 500px;
         height: 600px;
 
-        // 부모(Rust)에게 메시지를 전달하는 통로
         callback send_message(string);
-        // 서버에서 받은 메시지들이 저장될 변수
         in-out property <string> chat_log: "";
 
         VerticalLayout {
@@ -21,12 +19,20 @@ slint::slint! {
                 horizontal-alignment: center;
             }
 
-            // 채팅 내역이 표시되는 영역 (스크롤 가능)
-            ScrollView {
-                viewport-height: 400px;
-                Rectangle {
-                    background: #f0f0f0;
-                    Text {
+            Rectangle {
+                background: #f0f0f0;
+                vertical-stretch: 1;
+                border-radius: 4px;
+                // Rectangle 자체에 패딩을 주면 내부 ScrollView와 자연스러운 간격이 생깁니다.
+                padding: 10px; 
+
+                ScrollView {
+                    viewport-height: chat_text.preferred-height;
+
+                    chat_text := Text {
+                        // width 설정을 아예 삭제하거나 100%로 둡니다.
+                        // ScrollView 안에서 자동으로 너비를 채우며, 
+                        // 부족한 공간은 ScrollView가 알아서 스크롤바를 만듭니다.
                         text: root.chat_log;
                         wrap: word-wrap;
                         color: black;
@@ -37,14 +43,25 @@ slint::slint! {
 
             HorizontalLayout {
                 spacing: 10px;
+                height: 35px;
                 input := LineEdit {
                     placeholder-text: "메시지를 입력하세요...";
-                    accepted => { root.send_message(self.text); self.text = ""; }
+                    accepted => { 
+                        if (self.text != "") {
+                            root.send_message(self.text); 
+                            self.text = ""; 
+                        }
+                    }
                 }
                 Button {
                     text: "전송";
                     primary: true;
-                    clicked => { root.send_message(input.text); input.text = ""; }
+                    clicked => { 
+                        if (input.text != "") {
+                            root.send_message(input.text); 
+                            input.text = ""; 
+                        }
+                    }
                 }
             }
         }
